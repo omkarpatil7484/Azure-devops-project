@@ -7,9 +7,10 @@ on:
 
 env:
   ACR_LOGIN_SERVER: devopsdemoacricefrb.azurecr.io
+  ACR_USERNAME: devopsdemoacricefrb
   IMAGE_NAME: devops-app
-  RG_NAME: devopsdemo-rg
-  AKS_NAME: devopsdemo-aks
+  RESOURCE_GROUP: devopsdemo-rg
+  AKS_CLUSTER: devopsdemo-aks
 
 jobs:
   build_and_deploy:
@@ -28,7 +29,7 @@ jobs:
         uses: azure/docker-login@v2
         with:
           login-server: ${{ env.ACR_LOGIN_SERVER }}
-          username: devopsdemoacricefrb
+          username: ${{ env.ACR_USERNAME }}
           password: ${{ secrets.DEVOPSDEMOACRICEFRB }}
 
       - name: Build and Push Image
@@ -40,14 +41,13 @@ jobs:
       - name: Set AKS Context
         uses: azure/aks-set-context@v4
         with:
-          resource-group: ${{ env.RG_NAME }}
-          cluster-name: ${{ env.AKS_NAME }}
+          resource-group: ${{ env.RESOURCE_GROUP }}
+          cluster-name: ${{ env.AKS_CLUSTER }}
 
       - name: Deploy to Kubernetes
         run: |
           kubectl set image deployment/devops-demo-app devops-demo-app=$ACR_LOGIN_SERVER/$IMAGE_NAME:v${{ github.run_number }}
           kubectl rollout status deployment/devops-demo-app
-
 
 
 
