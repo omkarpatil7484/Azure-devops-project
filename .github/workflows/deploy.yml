@@ -5,16 +5,13 @@ on:
     branches:
       - main
 
-env:
-  ACR_LOGIN_SERVER: devopsdemoacricefrb.azurecr.io
-  ACR_USERNAME: devopsdemoacricefrb
-  IMAGE_NAME: devops-app
-  RESOURCE_GROUP: devopsdemo-rg
-  AKS_CLUSTER: devopsdemo-aks
-
 jobs:
   build_and_deploy:
     runs-on: ubuntu-latest
+
+    env:
+      ACR_LOGIN_SERVER: devopsdemoacricefrb.azurecr.io
+      IMAGE_NAME: devops-app
 
     steps:
       - name: Checkout Code
@@ -25,30 +22,42 @@ jobs:
         with:
           creds: ${{ secrets.AZURE_CREDENTIALS }}
 
-
       - name: Login to ACR
         uses: azure/docker-login@v2
         with:
           login-server: ${{ env.ACR_LOGIN_SERVER }}
-          username: ${{ env.ACR_USERNAME }}
+          username: devopsdemoacricefrb
           password: ${{ secrets.DEVOPSDEMOACRICEFRB }}
+
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v3
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+
 
       - name: Build and Push Image
         run: |
           cd app
-          docker build -t $ACR_LOGIN_SERVER/$IMAGE_NAME:v${{ github.run_number }} .
-          docker push $ACR_LOGIN_SERVER/$IMAGE_NAME:v${{ github.run_number }}
+          docker buildx build \
+            --platform linux/amd64,linux/arm64 \
+            -t $ACR_LOGIN_SERVER/$IMAGE_NAME:v${{ github.run_number }} \
+            --push \
+            .
+
 
       - name: Set AKS Context
         uses: azure/aks-set-context@v4
         with:
-          resource-group: ${{ env.RESOURCE_GROUP }}
-          cluster-name: ${{ env.AKS_CLUSTER }}
+          resource-group: devopsdemo-rg
+          cluster-name: devopsdemo-aks
 
       - name: Deploy to Kubernetes
         run: |
           kubectl set image deployment/devops-demo-app devops-demo-app=$ACR_LOGIN_SERVER/$IMAGE_NAME:v${{ github.run_number }}
           kubectl rollout status deployment/devops-demo-app
+
 
 
 
