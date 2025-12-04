@@ -2,6 +2,8 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: devops-demo-app
+  labels:
+    app: devops-demo-app
 spec:
   replicas: 1
   selector:
@@ -14,6 +16,15 @@ spec:
     spec:
       containers:
         - name: devops-demo-app
-          image: devopsdemoacricefrb.azurecr.io/devops-app:v1
+          image: devopsdemoacrye5c0e.azurecr.io/devops-app:v1
+          imagePullPolicy: Always
           ports:
             - containerPort: 8080
+          resources:
+            requests:
+              cpu: "100m"
+              memory: "128Mi"
+            limits:
+              cpu: "500m"
+              memory: "256Mi"
+
