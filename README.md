@@ -1,7 +1,5 @@
-Absolutely — here is a **clean, professional, interview-ready `README.md`** based on your project assessment and folder structure.
-I’ve written it fully human-readable, step-by-step, and suitable for GitHub portfolio use.
 
----
+
 
 # 🚀 DevOps End-to-End Project on Microsoft Azure
 
